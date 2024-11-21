@@ -1,193 +1,155 @@
-# DFA String Validator
+# DFA String Validator and Lexer Implementation
 
-## This is a C program that validates binary strings (`0`s and `1`s) using a Deterministic Finite Automaton (DFA). It continuously allows the user to test strings until they decide to exit.
+## Overview
 
-## Program Overview
+This repository contains two main implementations for binary string validation and lexical analysis:
 
-This program implements a DFA with the following states:
-
-- **`S` (Start State)**: The initial state of the DFA.
-- **`T` (Intermediate State)**: Transitioned to when specific conditions are met.
-- **`U` (Accepting/Final State)**: The state that determines if the input string is valid.
-
-### DFA Transitions:
-
-1. From `S`:
-   - `0` → Go to `T`.
-   - `1` → Go to `U`.
-2. From `T`:
-   - `0` → Stay in `T`.
-   - `1` → Go to `U`.
-3. From `U`:
-   - `0` → Go to `T`.
-   - `1` → Stay in `U`.
-
-### Valid Strings:
-
-A string is **valid** if it ends in **state `U`** after processing all characters.
+1. **Manual Lexer (in the `Lexer` folder)**: A manually implemented deterministic finite automaton (DFA) to validate binary strings.
+2. **Flex-based Lexer (in the `Flex` folder)**: A scanner generated using the `Flex` tool to handle lexical analysis.
 
 ---
 
-## How to Run the Program
+## Manual Lexer (in `Lexer` folder)
 
-### Compilation
+### Program Overview
 
-Make sure you have `gcc` installed on your system. To compile the program, run:
+The manual lexer validates binary strings (`0`s and `1`s) using a Deterministic Finite Automaton (DFA). It continuously allows the user to test strings until they decide to exit.
 
-```bash
-gcc lexer.c -o lexer
-```
+### DFA States and Transitions:
 
-### Execution
+- **States**:
 
-Run the compiled program:
+  - `S` (Start State)
+  - `T` (Intermediate State)
+  - `U` (Accepting/Final State)
 
-```bash
-./lexer
-```
+- **Transitions**:
 
-### Testing
+  1. From `S`:
+     - `0` → `T`
+     - `1` → `U`
+  2. From `T`:
+     - `0` → `T`
+     - `1` → `U`
+  3. From `U`:
+     - `0` → `T`
+     - `1` → `U`
 
-The program will prompt you to enter binary strings for validation. It will continuously ask for inputs unless you choose to exit.
-
----
-
-## Program Workflow
-
-### Main Features:
-
-1. **Input**: Accepts a binary string (`0`s and `1`s).
-2. **Validation**: Checks the string against DFA transitions.
-3. **Output**: Displays whether the string is valid or invalid.
-4. **Repeat or Exit**: Prompts the user to continue or exit.
+- A string is **valid** if it ends in state `U`.
 
 ---
 
-## Code Explanation
+### How to Run the Manual Lexer
 
-### Headers
+1. Navigate to the `Lexer` folder:
+
+   ```bash
+   cd Lexer
+   ```
+
+2. Compile the program:
+
+   ```bash
+   gcc lexer.c -o lexer
+   ```
+
+3. Run the compiled program:
+
+   ```bash
+   ./lexer
+   ```
+
+4. Enter binary strings for validation. The program will determine if the input is valid or invalid.
+
+---
+
+## Flex-based Lexer (in `Flex` folder)
+
+### Program Overview
+
+The Flex-based lexer is a general-purpose lexical analyzer generated using the `Flex` tool. It identifies tokens from an input file using predefined patterns.
+
+### Token Definitions:
+
+- **Whitespace**: Ignored.
+- **Keywords**: `while`
+- **Operators**: `+`
+- **Identifiers**: Any sequence of letters.
+- **Numbers**: Any sequence of digits.
+- **Error**: Any unrecognized character.
+
+---
+
+### How to Run the Flex Lexer
+
+1. Navigate to the `Flex` folder:
+
+   ```bash
+   cd Flex
+   ```
+
+2. Generate the C scanner code from the `scanner.flex` file:
+
+   ```bash
+   flex scanner.flex
+   ```
+
+   This will generate the `lex.yy.c` file.
+
+3. Compile the generated scanner code with the main program:
+
+   ```bash
+   gcc lex.yy.c main.c -o scanner
+   ```
+
+4. Create or use a test file (e.g., `program.c`) with sample input code.
+
+5. Run the lexer, specifying the input file:
+
+   ```bash
+   ./scanner
+   ```
+
+6. The lexer will output tokens and their corresponding text.
+
+---
+
+### Example Input (`program.c`):
 
 ```c
-#include <stdio.h>
-#include <string.h>
-```
-
-- **`#include <stdio.h>`**: Includes functions for input/output (`printf`, `scanf`).
-- **`#include <string.h>`**: Includes string manipulation functions, though not used directly here.
-
----
-
-### Enumerated States
-
-```c
-typedef enum {
-    S,  // Start state
-    T,  // Intermediate state
-    U   // Final/Accepting state
-} State;
-```
-
-- Defines the DFA states as an enumerated type.
-
----
-
-### `isValid` Function
-
-```c
-int isValid(const char *input);
-```
-
-This function processes the input string and validates it based on the DFA rules:
-
-1. **Start at State `S`**.
-2. For each character:
-   - Transition to the next state based on the current state and input.
-   - Return `0` if an invalid character is encountered.
-3. **Accept if the final state is `U`**; otherwise, reject.
-
----
-
-### Main Function
-
-```c
-int main() {
-    char input[100];
-    char choice;
-    ...
+while (x + 5)
+{
+    x = x + 1;
 }
 ```
 
-1. **Input**: Prompts the user to enter a binary string.
-2. **Validation**: Calls `isValid` to check the string.
-3. **Output**: Displays whether the string is valid or invalid.
-4. **Repeat or Exit**: Allows the user to test another string or terminate the program.
+### Example Output:
+
+```
+token: 1 text: while
+token: 2 text: (
+token: 3 text: x
+token: 4 text: +
+token: 5 text: 5
+token: 6 text: )
+...
+```
 
 ---
 
-### DFA Transition Logic
+## Folder Structure
 
-The DFA transitions are implemented using a `switch`-`case` block inside `isValid`:
-
-#### Example:
-
-```c
-case S:
-    if (c == '0') {
-        currentState = T;  // Transition to T
-    } else if (c == '1') {
-        currentState = U;  // Transition to U
-    } else {
-        return 0;  // Invalid character
-    }
-    break;
-```
-
-- Transitions are determined based on the current state and input character.
-- Invalid characters (`not '0' or '1'`) immediately terminate validation.
-
----
-
-### Loop for Multiple Inputs
-
-The program allows multiple inputs using a `do-while` loop:
-
-```c
-do {
-    // Input, validation, and output
-    printf("Do you want to validate another string? (y/n): ");
-    scanf(" %c", &choice);
-} while (choice == 'y' || choice == 'Y');
-```
-
-- Continues until the user enters `n` or any non-`y` character.
-
----
-
-### Example Usage
-
-**Input 1**:
-
-```
-Enter a string to validate: 101
-The string '101' is valid.
-
-Do you want to validate another string? (y/n): y
-```
-
-**Input 2**:
-
-```
-Enter a string to validate: 1002
-The string '1002' is invalid.
-
-Do you want to validate another string? (y/n): n
-```
+- **`Lexer`**: Contains the manually implemented lexer with DFA logic.
+- **`Flex`**: Contains the Flex scanner implementation, including:
+  - `scanner.flex`: The Flex specification file.
+  - `main.c`: The main driver program for the lexer.
+  - `token.h`: Defines the token types.
 
 ---
 
 ## Contribution
 
-Feel free to fork, modify, and submit pull requests. This is a simple implementation to learn DFA programming concepts in C.
+Feel free to fork, modify, and submit pull requests. Contributions to improve either the manual or Flex-based lexer implementations are welcome.
 
 ---
 
