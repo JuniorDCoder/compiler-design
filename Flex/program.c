@@ -1,2 +1,4 @@
-while
-123 + foo
+while (x + 5)
+{
+    x = x + 1;
+}
